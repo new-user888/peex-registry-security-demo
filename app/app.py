@@ -1,6 +1,7 @@
-import os
+import subprocess
 
 from flask import Flask, request
+from markupsafe import escape
 
 app = Flask(__name__)
 
@@ -13,8 +14,10 @@ def health():
 @app.route("/echo")
 def echo():
     name = request.args.get("name", "world")
-    os.system(f"echo Hello {name}")
-    return {"echoed": name}
+    # fixed: py/command-line-injection - no shell, args passed as a list
+    subprocess.run(["echo", "Hello", name], shell=False, check=False)
+    # fixed: py/reflective-xss - escape before reflecting user input back
+    return {"echoed": str(escape(name))}
 
 
 if __name__ == "__main__":

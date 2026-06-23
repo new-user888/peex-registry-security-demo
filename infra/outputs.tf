@@ -9,3 +9,4 @@ output "ecr_repository_arn" {
 output "ci_role_arn" {
   value = aws_iam_role.ci.arn
 }
+ 

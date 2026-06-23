@@ -135,7 +135,8 @@ policy.
 
 ```sh
 IMAGE_TAG=$(aws ecr describe-images --repository-name peex-registry-security --region eu-central-1 \
-  --query "imageDetails[0].imageTags[0]" --output text)
+  --query "imageDetails[?contains(imageTags[0],'v')] | [0].imageTags[0]" --output text)
+# -> v1.0.0 (semver tag, not a commit SHA - bump the root VERSION file before the next release push)
 
 aws ecr describe-image-scan-findings --repository-name peex-registry-security \
   --image-id imageTag=$IMAGE_TAG --region eu-central-1 \

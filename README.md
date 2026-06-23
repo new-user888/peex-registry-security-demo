@@ -48,6 +48,11 @@ GitHub repo (branch-protected main)
 
 - **Private registry**: `aws_ecr_repository.app`, `image_tag_mutability = IMMUTABLE` (tags can't
   be overwritten once pushed — supply-chain integrity).
+- **Versioning**: images are tagged with a semantic version read from the root `VERSION` file
+  (e.g. `v1.0.0`), not the commit SHA — easier to identify "what's actually running" than a hash.
+  Because the repository is immutable, `VERSION` must be bumped before every push that should
+  produce a new image; pushing the same version twice fails on purpose (the immutable tag already
+  exists), which is a deliberate guard against silently replacing a released image.
 - **Image scanning**: `scan_on_push = true`. The first pushed image (built from the deliberately
   outdated `python:3.9.0-slim` base) was scanned and found **20 CRITICAL, 49 HIGH, 36 MEDIUM, 3
   LOW** real CVEs in OS-level packages (glibc, dpkg, etc.) — a genuine vulnerability scanner

@@ -27,5 +27,8 @@ jobs:
         env:
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_URL }}
         run: |
-          docker build -t "$ECR_REPOSITORY:${{ github.sha }}" .
-          docker push "$ECR_REPOSITORY:${{ github.sha }}"
+          VERSION="v$(cat VERSION)"
+          # repo has image_tag_mutability=IMMUTABLE, so "latest" can't be reused across
+          # builds - only push the semver tag; bump VERSION before each release.
+          docker build -t "$ECR_REPOSITORY:$VERSION" .
+          docker push "$ECR_REPOSITORY:$VERSION"

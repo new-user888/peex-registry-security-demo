@@ -3,6 +3,12 @@ name: Build and push to ECR
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to build and push (e.g. v1.2.0). Leave empty to use the VERSION file."
+        required: false
+        default: ""
 
 permissions:
   id-token: write
@@ -26,9 +32,14 @@ jobs:
       - name: Build and push image
         env:
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_URL }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          VERSION="v$(cat VERSION)"
-          # repo has image_tag_mutability=IMMUTABLE, so "latest" can't be reused across
-          # builds - only push the semver tag; bump VERSION before each release.
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="v$(cat VERSION)"
+          fi
+          # repo has image_tag_mutability=IMMUTABLE, so a given tag can only be pushed
+          # once - pick a version that hasn't been pushed yet (dispatch input or bump VERSION).
           docker build -t "$ECR_REPOSITORY:$VERSION" .
           docker push "$ECR_REPOSITORY:$VERSION"

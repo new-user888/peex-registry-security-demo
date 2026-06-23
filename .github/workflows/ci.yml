@@ -1,0 +1,31 @@
+name: Build and push to ECR
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC (no static keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Log in to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_URL }}
+        run: |
+          docker build -t "$ECR_REPOSITORY:${{ github.sha }}" .
+          docker push "$ECR_REPOSITORY:${{ github.sha }}"

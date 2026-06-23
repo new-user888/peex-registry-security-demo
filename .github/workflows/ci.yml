@@ -25,7 +25,7 @@ jobs:
 
       - name: Configure AWS credentials via OIDC (no static keys)
         if: github.event_name == 'workflow_dispatch'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
           aws-region: eu-central-1
